@@ -1,6 +1,4 @@
-<frame>
-    <Home />
-</frame>
+<Home />
 
 <script lang="ts">
     import Home from './components/Home.svelte'
