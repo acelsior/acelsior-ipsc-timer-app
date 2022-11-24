@@ -1,8 +1,10 @@
 <script lang="ts">
 	export let time: number
+
+
 </script>
 
-<label>{time.toFixed(2)}</label>
+<label>{(time).toFixed(2)}</label>
 
 <style lang="scss">
 	@import "../../color.scss";

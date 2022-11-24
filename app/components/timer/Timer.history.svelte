@@ -1,12 +1,21 @@
 <script lang="ts">
-	import { afterUpdate } from 'svelte';
-	export let timerHistory :number[]
-	let reversedHistory = new Array<number>();
+	interface record { //data for display
+		shot: number;
+		time: number;
+		timestamp: Date;
+		splitTime: number;
+	}
 
-	afterUpdate(() => { //reverse history list with deep copy
-		reversedHistory = [...timerHistory];
-		reversedHistory.reverse();
-	})
+	export let records: record[] = []
+
+	let reversedRecords: record[] = []
+	import { beforeUpdate, tick } from 'svelte';
+
+	beforeUpdate(async () => {
+		reversedRecords = records.reverse();
+		await tick();
+	});
+
 
 </script>
 
@@ -14,9 +23,9 @@
     <label>Hit History</label>
     <scrollView>
         <stackLayout>
-			{#each reversedHistory as item}
+			{#each reversedRecords as item}
 				<button>
-                    {item.toFixed(2)}
+                   	🔘 {item.shot}: {item.time.toFixed(2)} - {item.splitTime.toFixed(2)}
                 </button>
 			{/each}
         </stackLayout>
@@ -40,8 +49,6 @@
 		color: $majorColor;
         font-size: 30px;
         background-color: $cautionBackgroundColor;
-        padding: 40px;
-		padding-left: 50px;
         text-align: left;
 	}
 
