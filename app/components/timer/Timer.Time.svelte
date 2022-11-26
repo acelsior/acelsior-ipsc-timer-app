@@ -6,7 +6,7 @@
 
 <label>{(time).toFixed(2)}</label>
 
-<style lang="scss">
+<style scoped lang="scss">
 	@import "../../color.scss";
 
 	label {

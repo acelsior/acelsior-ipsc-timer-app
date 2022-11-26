@@ -7,11 +7,11 @@
 </script>
 
 <flexboxLayout>
-    <label >Shot {currentShot} / {totalShot - 1 }</label> <!--  /* -1 for array.length  */ -->
+    <label >Shot {currentShot} / {totalShot}</label>
     <label >Split {(splitTime).toFixed(2)}</label>
 </flexboxLayout>
 
-<style lang="scss">
+<style scoped  lang="scss">
 	@import "../../color.scss";
 
 	label {

@@ -3,8 +3,25 @@
 	import TimerDetails from "./Timer.Details.svelte";
 	import TimerButtonGroup from "./Timer.buttonGroup.svelte";
 	import TimerHistory from "./Timer.history.svelte";
+	import { Bluetooth } from "@nativescript-community/ble";
+	import { IPSCBluetooth } from "./StopPlateBluethoothClass";
 
-	interface record { //data for display
+	(async () => {
+		let stopPlate = new IPSCBluetooth();
+		stopPlate.connect().then(() => {
+			stopPlate.bluetooth.startNotifying({
+				characteristicUUID: "0739",
+				peripheralUUID: stopPlate.stopPlatePeripheralUUID,
+				serviceUUID: "1b2c",
+				onNotify: (data) => {
+					onTimerStop();
+				}
+			})
+		})
+	})();
+
+	interface record {
+		//data for display
 		shot: number;
 		time: number;
 		timestamp: Date;
@@ -12,39 +29,165 @@
 	}
 
 	let displayTime = 0; //display time , in normally this equals to record.time , when timer start it will be count down
-	let currentShot: number = 1 //in program order
-	let records : record[] = [
+	let currentShot: number = 0; //in program order
+	let totalShot: number = 0; //in program order
+	let records: record[] = [
 		{
 			shot: 0,
 			time: 0,
 			timestamp: new Date(),
 			splitTime: 0,
 		},
-		{
-			shot: 1,
-			time: 1.88,
-			timestamp: new Date(),
-			splitTime: 1.88,
-		}
 	];
+	let menuButtonEnabled: boolean = true;
+	let startButtonEnabled: boolean = true;
+	let clearButtonEnabled: boolean = true;
+	let reviewButtonEnabled: boolean = true;
+	let stopButtonEnabled: boolean = false;
+	let isTimerStarted: boolean = false;
 
+	function beep(duration: number, frequency: number, volume: number) {
+		const myAudioContext = new AudioContext();
+		return new Promise((resolve, reject) => {
+			// Set default duration if not provided
+			duration = duration || 200;
+			frequency = frequency || 440;
+			volume = volume || 100;
 
+			try {
+				let oscillatorNode = myAudioContext.createOscillator();
+				let gainNode = myAudioContext.createGain();
+				oscillatorNode.connect(gainNode);
 
+				// Set the oscillator frequency in hertz
+				oscillatorNode.frequency.value = frequency;
 
+				// Set the type of oscillator
+				oscillatorNode.type = "square";
+				gainNode.connect(myAudioContext.destination);
+
+				// Set the gain to the volume
+				gainNode.gain.value = volume * 0.01;
+
+				// Start audio with the desired duration
+				oscillatorNode.start(myAudioContext.currentTime);
+				oscillatorNode.stop(
+					myAudioContext.currentTime + duration * 0.001
+				);
+
+				// Resolve the promise when the sound is finished
+				oscillatorNode.onended = () => {
+					resolve(null);
+				};
+			} catch (error) {
+				reject(error);
+			}
+		});
+	}
+
+	async function onTimerStart() {
+		stopButtonEnabled = true;
+		reviewButtonEnabled = true;
+		menuButtonEnabled = false;
+		startButtonEnabled = false;
+		clearButtonEnabled = false;
+		isTimerStarted = true;
+		//#region count down
+		let countDownInterval: NodeJS.Timer;
+		let startCountDownTime = new Date().getTime();
+		let countDownDelay = Math.random() * 5;
+		/**
+			await
+		*/ new Promise((resolve, reject) => {
+			countDownInterval = setInterval(() => {
+				displayTime =
+					countDownDelay -
+					(new Date().getTime() - startCountDownTime) / 1000;
+				if (
+					(new Date().getTime() - startCountDownTime) / 1000 >
+					countDownDelay
+				) {
+					clearInterval(countDownInterval);
+					resolve(null);
+				}
+			}, 1);
+		});
+		//#endregion
+		onTimerClear();
+
+		beep(
+			// Set the duration to 0.2 second (200 milliseconds)
+			1000,
+			// Set the frequency of the note to A4 (440 Hz)
+			1024,
+			// Set the volume of the beep to 100%
+			100
+		);
+	}
+	function onTimerClear() {
+		records = [
+			{
+				shot: 0,
+				time: 0,
+				timestamp: new Date(),
+				splitTime: 0,
+			},
+		];
+		currentShot = 0;
+		displayTime = 0;
+		totalShot = 0;
+	}
+	function onTimerReview() {
+		menuButtonEnabled = true;
+		startButtonEnabled = true;
+		clearButtonEnabled = true;
+		reviewButtonEnabled = true;
+		stopButtonEnabled = false;
+		isTimerStarted = false;
+	}
+	function onTimerStop() {
+		if (!isTimerStarted) return;
+		var nowTime = new Date().getTime();
+		records.push({
+			shot: currentShot + 1,
+			time: (nowTime - records[0].timestamp.getTime()) / 1000,
+			timestamp: new Date(),
+			splitTime:
+				(nowTime - records[currentShot].timestamp.getTime()) / 1000,
+		});
+		records = records;
+		currentShot += 1;
+		totalShot += 1;
+		displayTime = (nowTime - records[0].timestamp.getTime()) / 1000;
+	}
 </script>
 
 <dockLayout stretchLastChild="false">
 	<flexboxLayout dock="top">
-		<TimerTime bind:time={displayTime}/>
-		<TimerDetails bind:currentShot={records[currentShot].shot} bind:totalShot={records.length} bind:splitTime={records[currentShot].splitTime}/>
-		<TimerButtonGroup />
+		<TimerTime bind:time={displayTime} />
+		<TimerDetails
+			bind:currentShot={records[currentShot].shot}
+			bind:totalShot
+			bind:splitTime={records[currentShot].splitTime}
+		/>
+		<TimerButtonGroup
+			on:start={onTimerStart}
+			on:clear={onTimerClear}
+			on:review={onTimerReview}
+			on:stop={onTimerStop}
+			{menuButtonEnabled}
+			{startButtonEnabled}
+			{clearButtonEnabled}
+			{reviewButtonEnabled}
+			{stopButtonEnabled}
+		/>
 	</flexboxLayout>
 	<flexboxLayout dock="top" style="height: 100%;">
-		<TimerHistory records={records} />
+		<TimerHistory {records} />
 	</flexboxLayout>
 </dockLayout>
 
-<style lang="scss">
+<style scoped lang="scss">
 	@import "../../color.scss";
 
 	flexboxLayout {
