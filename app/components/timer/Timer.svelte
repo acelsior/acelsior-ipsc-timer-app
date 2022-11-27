@@ -3,22 +3,10 @@
 	import TimerDetails from "./Timer.Details.svelte";
 	import TimerButtonGroup from "./Timer.buttonGroup.svelte";
 	import TimerHistory from "./Timer.history.svelte";
-	import { Bluetooth } from "@nativescript-community/ble";
+	import Setting from "./setting/Timer.setting.svelte";
 	import { IPSCBluetooth } from "./StopPlateBluethoothClass";
-
-	(async () => {
-		let stopPlate = new IPSCBluetooth();
-		stopPlate.connect().then(() => {
-			stopPlate.bluetooth.startNotifying({
-				characteristicUUID: "0739",
-				peripheralUUID: stopPlate.stopPlatePeripheralUUID,
-				serviceUUID: "1b2c",
-				onNotify: (data) => {
-					onTimerStop();
-				}
-			})
-		})
-	})();
+	import { showModal } from "svelte-native";
+	import { TimerSetting } from "./setting/TimerSettingClass";
 
 	interface record {
 		//data for display
@@ -45,6 +33,7 @@
 	let reviewButtonEnabled: boolean = true;
 	let stopButtonEnabled: boolean = false;
 	let isTimerStarted: boolean = false;
+	let countDownInterval: NodeJS.Timer;
 
 	function beep(duration: number, frequency: number, volume: number) {
 		const myAudioContext = new AudioContext();
@@ -85,6 +74,12 @@
 		});
 	}
 
+	function getRandomNumberInRange(min: number, max: number) {
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.random() * (max - min) + min; // The maximum is exclusive and the minimum is inclusive
+	}
+
 	async function onTimerStart() {
 		stopButtonEnabled = true;
 		reviewButtonEnabled = true;
@@ -93,12 +88,16 @@
 		clearButtonEnabled = false;
 		isTimerStarted = true;
 		//#region count down
-		let countDownInterval: NodeJS.Timer;
 		let startCountDownTime = new Date().getTime();
-		let countDownDelay = Math.random() * 5;
-		/**
-			await
-		*/ new Promise((resolve, reject) => {
+		let countDownDelay = getRandomNumberInRange(
+			TimerSetting.DelayMin,
+			TimerSetting.DelayMax
+		);
+		IPSCBluetooth.registerHitEvent(() => {
+			onTimerStop();
+		});
+
+		await new Promise((resolve, reject) => {
 			countDownInterval = setInterval(() => {
 				displayTime =
 					countDownDelay -
@@ -124,6 +123,7 @@
 			100
 		);
 	}
+
 	function onTimerClear() {
 		records = [
 			{
@@ -144,6 +144,8 @@
 		reviewButtonEnabled = true;
 		stopButtonEnabled = false;
 		isTimerStarted = false;
+		clearInterval(countDownInterval);
+		IPSCBluetooth.unregisterHitEvent();
 	}
 	function onTimerStop() {
 		if (!isTimerStarted) return;
@@ -160,6 +162,10 @@
 		totalShot += 1;
 		displayTime = (nowTime - records[0].timestamp.getTime()) / 1000;
 	}
+
+	function onMenu() {
+		showModal({ page: Setting, fullscreen: true, animated: true });
+	}
 </script>
 
 <dockLayout stretchLastChild="false">
@@ -175,6 +181,7 @@
 			on:clear={onTimerClear}
 			on:review={onTimerReview}
 			on:stop={onTimerStop}
+			on:menu={onMenu}
 			{menuButtonEnabled}
 			{startButtonEnabled}
 			{clearButtonEnabled}
