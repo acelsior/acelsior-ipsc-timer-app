@@ -103,13 +103,14 @@
 				<label>s</label>
 			</flexboxLayout>
 			<flexboxLayout id="beep_duration">
-				<label>Beep sound duration ({beepDuration} sec): </label>
-				<slider
-					value={beepDuration}
-					on:valueChange={onBeepDurationChange}
-					minValue="1"
-					maxValue="10"
+				<label>Beep sound duration: </label>
+				<textField
+					text={beepDuration.toFixed(2)}
+					keyboardType="number"
+					textDecoration={"underline"}
+					on:textChange={onBeepDurationChange}
 				/>
+				<label>second</label>
 			</flexboxLayout>
 			<stackLayout id="stopplate_list">
 				<label>Stop plate list:</label>
