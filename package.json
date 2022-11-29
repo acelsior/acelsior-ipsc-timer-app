@@ -1,10 +1,11 @@
 {
 	"name": "ns_ipsc_timer",
 	"main": "app/app.ts",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"private": true,
 	"scripts": {
-		"build:release": "ns build android --release --key-store-path key_store/my-app-android-key.jks --key-store-password ipsc_timer --key-store-alias myAlias --key-store-alias-password ipsc_timer --copy-to build/app-release.apk"
+		"build:release": "ns build android --release --key-store-path key_store/my-app-android-key.jks --key-store-password ipsc_timer --key-store-alias myAlias --key-store-alias-password ipsc_timer --copy-to build/app-release.apk",
+		"gen_key": "keytool -genkey -v -keystore key_store/my-app-android-key.jks -keyalg RSA -alias myAlias -keypass ipsc_timer -new ipsc_timer -storepass ipsc_timer -v"
 	},
 	"dependencies": {
 		"@nativescript-community/ble": "^3.1.10",
