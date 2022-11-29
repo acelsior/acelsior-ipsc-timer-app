@@ -1,11 +1,17 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
+	import { TimerSetting } from "./setting/TimerSettingClass";
 	const dispatch = createEventDispatcher();
 	export let menuButtonEnabled: boolean = true;
 	export let startButtonEnabled: boolean = true;
 	export let clearButtonEnabled: boolean = true;
 	export let reviewButtonEnabled: boolean = true;
 	export let stopButtonEnabled: boolean = true;
+
+
+	TimerSetting.onSettingsChanged(() => {
+		TimerSetting.isManualStopEnable = TimerSetting.isManualStopEnable; //force re-render
+	});
 </script>
 
 <flexboxLayout>
@@ -21,11 +27,13 @@
 	<button isEnabled={reviewButtonEnabled} on:tap={() => dispatch("review")}
 		>REVIEW</button
 	>
-	<button
-		isEnabled={stopButtonEnabled}
-		class="bigButton"
-		on:tap={() => dispatch("stop")}>MANUAL STOP</button
-	>
+	{#if TimerSetting.isManualStopEnable}
+		<button
+			isEnabled={stopButtonEnabled}
+			class="bigButton"
+			on:tap={() => dispatch("stop")}>MANUAL STOP</button
+		>
+	{/if}
 </flexboxLayout>
 
 <style scoped lang="scss">

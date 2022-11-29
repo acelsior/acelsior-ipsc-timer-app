@@ -42,6 +42,7 @@
 	let display_DelayFrom = TimerSetting.DelayMin.toString(); //DelayFrom.toString -> display_DelayFrom
 	let display_DelayTo = TimerSetting.DelayMax.toString(); // DelayTo.toString -> display_DelayTo
 	let stopplateList: { UUID: string; localName: string }[] = [];
+	let isManualStopEnable = TimerSetting.isManualStopEnable;
 
 	function onStopPlateIndicatorDurationChange(data: PropertyChangeData) {
 		StopPlateIndicatorDuration = data.value;
@@ -61,7 +62,10 @@
 	function onBeepDurationChange(data: PropertyChangeData) {
 		beepDuration = data.value;
 		TimerSetting.BeepDuration = parseFloat(data.value);
-		IPSCBluetooth.setIndicatorDuration(parseFloat(data.value));
+	}
+
+	function onManualStopChange(data: PropertyChangeData) {
+		TimerSetting.isManualStopEnable = data.value;
 	}
 </script>
 
@@ -111,6 +115,13 @@
 					on:textChange={onBeepDurationChange}
 				/>
 				<label>second</label>
+			</flexboxLayout>
+			<flexboxLayout id="beep_duration">
+				<label>Is manual stop enable: </label>
+				<switch
+					checked={isManualStopEnable}
+					on:checkedChange={onManualStopChange}
+				/>
 			</flexboxLayout>
 			<stackLayout id="stopplate_list">
 				<label>Stop plate list:</label>
