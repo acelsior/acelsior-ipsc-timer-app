@@ -18,7 +18,7 @@
 		splitTime: number;
 	}
 
-	let displayTime = 0; //display time , in normally this equals to record.time , when timer start it will be count down
+	export let displayTime = 0; //display time , in normally this equals to record.time , when timer start it will be count down
 	let currentShot: number = 0; //in program order
 	let totalShot: number = 0; //in program order
 	let records: record[] = [
@@ -55,7 +55,6 @@
 	function beep(duration: number) {
 		mediaPlayer.setAudioStreamType(android.media.AudioManager.STREAM_RING);
 		mediaPlayer.prepare();
-		mediaPlayer.setLooping(true);
 		mediaPlayer.setVolume(100, 100);
 		mediaPlayer.start();
 		setTimeout(() => {
