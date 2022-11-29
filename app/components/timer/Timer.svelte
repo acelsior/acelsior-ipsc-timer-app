@@ -53,7 +53,7 @@
 	}
 
 	function beep(duration: number) {
-		mediaPlayer.setAudioStreamType(android.media.AudioManager.STREAM_RING);
+		mediaPlayer.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC);
 		mediaPlayer.prepare();
 		mediaPlayer.setVolume(100, 100);
 		mediaPlayer.start();
