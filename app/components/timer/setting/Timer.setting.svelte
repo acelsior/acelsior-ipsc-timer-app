@@ -50,14 +50,16 @@
 		IPSCBluetooth.setIndicatorDuration(parseFloat(data.value));
 	}
 
-	function onDelayFromNumberChange(data: PropertyChangeData) {
+	function onDelayMinNumberChange(data: PropertyChangeData) {
 		display_DelayFrom = data.value.toString();
-		TimerSetting.DelayMin = parseFloat(data.value);
+		var newVal = Math.abs(parseFloat(data.value));
+		TimerSetting.DelayMin = newVal;
 	}
 
-	function onDelayToNumberChange(data: PropertyChangeData) {
+	function onDelayMaxNumberChange(data: PropertyChangeData) {
 		display_DelayTo = data.value.toString();
-		TimerSetting.DelayMax = parseFloat(data.value);
+		var newVal = Math.abs(parseFloat(data.value));
+		TimerSetting.DelayMax = newVal;
 	}
 	function onBeepDurationChange(data: PropertyChangeData) {
 		beepDuration = data.value;
@@ -95,14 +97,14 @@
 					text={display_DelayFrom}
 					keyboardType="number"
 					textDecoration={"underline"}
-					on:textChange={onDelayFromNumberChange}
+					on:textChange={onDelayMinNumberChange}
 				/>
 				<label>s and </label>
 				<textField
 					text={display_DelayTo}
 					keyboardType="number"
 					textDecoration={"underline"}
-					on:textChange={onDelayToNumberChange}
+					on:textChange={onDelayMaxNumberChange}
 				/>
 				<label>s</label>
 			</flexboxLayout>
