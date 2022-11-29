@@ -38,6 +38,7 @@
 	//#endregion
 
 	let StopPlateIndicatorDuration = TimerSetting.StopPlateIndicatorDuration;
+	let beepDuration = TimerSetting.BeepDuration;
 	let display_DelayFrom = TimerSetting.DelayMin.toString(); //DelayFrom.toString -> display_DelayFrom
 	let display_DelayTo = TimerSetting.DelayMax.toString(); // DelayTo.toString -> display_DelayTo
 	let stopplateList: { UUID: string; localName: string }[] = [];
@@ -57,6 +58,11 @@
 		display_DelayTo = data.value.toString();
 		TimerSetting.DelayMax = parseFloat(data.value);
 	}
+	function onBeepDurationChange(data: PropertyChangeData) {
+		beepDuration = data.value;
+		TimerSetting.BeepDuration = parseFloat(data.value);
+		IPSCBluetooth.setIndicatorDuration(parseFloat(data.value));
+	}
 </script>
 
 <frame>
@@ -70,10 +76,8 @@
 				<button text="Flash" on:tap={onFlashStopPlate} />
 			</flexboxLayout>
 			<flexboxLayout id="stopplate_indicator_section">
-				<label
-					>Stop plate indicator duration ( {StopPlateIndicatorDuration}
-					sec):</label
-				>
+				<label>Stop plate indicator duration </label>
+				<label>({StopPlateIndicatorDuration} sec):</label>
 				<slider
 					value={StopPlateIndicatorDuration}
 					on:valueChange={onStopPlateIndicatorDurationChange}
@@ -97,6 +101,15 @@
 					on:textChange={onDelayToNumberChange}
 				/>
 				<label>s</label>
+			</flexboxLayout>
+			<flexboxLayout id="beep_duration">
+				<label>Beep sound duration ({beepDuration} sec): </label>
+				<slider
+					value={beepDuration}
+					on:valueChange={onBeepDurationChange}
+					minValue="1"
+					maxValue="10"
+				/>
 			</flexboxLayout>
 			<stackLayout id="stopplate_list">
 				<label>Stop plate list:</label>
@@ -143,5 +156,9 @@
 	}
 	#stopplate_bluetooth_section > button {
 		font-size: 12px;
+	}
+	#beep_duration > slider {
+		width: 40%;
+		ruby-align: right;
 	}
 </style>

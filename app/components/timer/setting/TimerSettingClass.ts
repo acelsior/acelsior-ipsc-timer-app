@@ -30,4 +30,16 @@ export class TimerSetting {
 	static get StopPlateIndicatorDuration (){
 		return ApplicationSettings.getNumber("timer:StopPlateIndicatorDuration", 1)
 	}
+
+	static set BeepDuration (duration: number){
+		ApplicationSettings.setNumber("timer:BeepDuration", duration)
+		ApplicationSettings.flush()
+		console.log("timer:BeepDuration changed to", ApplicationSettings.getNumber("timer:BeepDuration"));
+
+	}
+	static get BeepDuration (){
+		return ApplicationSettings.getNumber("timer:BeepDuration", 1000)
+	}
+
+
 }

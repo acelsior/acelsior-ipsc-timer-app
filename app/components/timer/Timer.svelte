@@ -8,6 +8,8 @@
 	import { showModal } from "svelte-native";
 	import { TimerSetting } from "./setting/TimerSettingClass";
 
+	import * as fs from "@nativescript/core/file-system";
+
 	interface record {
 		//data for display
 		shot: number;
@@ -35,49 +37,30 @@
 	let isTimerStarted: boolean = false;
 	let countDownInterval: NodeJS.Timer;
 
-	function beep(duration: number, frequency: number, volume: number) {
-		const myAudioContext = new AudioContext();
-		return new Promise((resolve, reject) => {
-			// Set default duration if not provided
-			duration = duration || 200;
-			frequency = frequency || 440;
-			volume = volume || 100;
-
-			try {
-				let oscillatorNode = myAudioContext.createOscillator();
-				let gainNode = myAudioContext.createGain();
-				oscillatorNode.connect(gainNode);
-
-				// Set the oscillator frequency in hertz
-				oscillatorNode.frequency.value = frequency;
-
-				// Set the type of oscillator
-				oscillatorNode.type = "square";
-				gainNode.connect(myAudioContext.destination);
-
-				// Set the gain to the volume
-				gainNode.gain.value = volume * 0.01;
-
-				// Start audio with the desired duration
-				oscillatorNode.start(myAudioContext.currentTime);
-				oscillatorNode.stop(
-					myAudioContext.currentTime + duration * 0.001
-				);
-
-				// Resolve the promise when the sound is finished
-				oscillatorNode.onended = () => {
-					resolve(null);
-				};
-			} catch (error) {
-				reject(error);
-			}
-		});
-	}
+	//#region get buzzer ready
+	const pathToBeep = fs.path.join(
+		fs.knownFolders.currentApp().path,
+		"/audio/beep.mp3"
+	);
+	//#endregion
+	var mediaPlayer = new android.media.MediaPlayer();
+	mediaPlayer.setDataSource(pathToBeep);
 
 	function getRandomNumberInRange(min: number, max: number) {
 		min = Math.ceil(min);
 		max = Math.floor(max);
 		return Math.random() * (max - min) + min; // The maximum is exclusive and the minimum is inclusive
+	}
+
+	function beep(duration: number) {
+		mediaPlayer.setAudioStreamType(android.media.AudioManager.STREAM_RING);
+		mediaPlayer.prepare();
+		mediaPlayer.setLooping(true);
+		mediaPlayer.setVolume(100, 100);
+		mediaPlayer.start();
+		setTimeout(() => {
+			mediaPlayer.stop();
+		}, duration);
 	}
 
 	async function onTimerStart() {
@@ -106,22 +89,14 @@
 					(new Date().getTime() - startCountDownTime) / 1000 >
 					countDownDelay
 				) {
-					clearInterval(countDownInterval);
 					resolve(null);
 				}
 			}, 1);
 		});
 		//#endregion
 		onTimerClear();
-
-		beep(
-			// Set the duration to 0.2 second (200 milliseconds)
-			1000,
-			// Set the frequency of the note to A4 (440 Hz)
-			1024,
-			// Set the volume of the beep to 100%
-			100
-		);
+		clearInterval(countDownInterval);
+		beep(TimerSetting.BeepDuration * 1000);
 	}
 
 	function onTimerClear() {
@@ -166,6 +141,12 @@
 	function onMenu() {
 		showModal({ page: Setting, fullscreen: true, animated: true });
 	}
+
+	function onSelectHistory(e: CustomEvent<{ item: record }>) {
+		currentShot = records.indexOf(e.detail.item);
+		records = [...records]; //force svelte re-render
+		displayTime = e.detail.item.time;
+	}
 </script>
 
 <dockLayout stretchLastChild="false">
@@ -190,7 +171,7 @@
 		/>
 	</flexboxLayout>
 	<flexboxLayout dock="top" style="height: 100%;">
-		<TimerHistory {records} />
+		<TimerHistory on:selectHistory={onSelectHistory} {records} />
 	</flexboxLayout>
 </dockLayout>
 

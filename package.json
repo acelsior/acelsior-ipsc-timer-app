@@ -9,6 +9,7 @@
 		"@nativescript/core": "~8.3.0",
 		"@nativescript/theme": "~3.0.2",
 		"nativescript-audio": "^6.2.6",
+		"nativescript-sound": "^1.0.4",
 		"nativescript-sound-kak": "^1.2.0",
 		"svelte-native": "~1.0.0"
 	},

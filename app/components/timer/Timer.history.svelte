@@ -16,6 +16,9 @@
 		reversedHistory = [...records];
 		reversedHistory.reverse();
 	});
+
+	import { createEventDispatcher } from "svelte";
+	const dispatch = createEventDispatcher();
 </script>
 
 <stackLayout>
@@ -23,7 +26,11 @@
 	<scrollView>
 		<stackLayout>
 			{#each reversedHistory as item}
-				<button>
+				<button
+					on:tap={() => {
+						dispatch("selectHistory", { item });
+					}}
+				>
 					🔘 {item.shot}: {item.time.toFixed(2)} - {item.splitTime.toFixed(
 						2
 					)}
