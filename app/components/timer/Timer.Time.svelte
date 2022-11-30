@@ -1,7 +1,6 @@
 <script lang="ts">
 	export let time: number
-
-
+	import { TimerSetting } from "./setting/TimerSettingClass";
 </script>
 
 <label>{(time).toFixed(2)}</label>

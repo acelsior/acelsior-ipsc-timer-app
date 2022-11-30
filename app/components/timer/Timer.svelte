@@ -5,10 +5,11 @@
 	import TimerHistory from "./Timer.history.svelte";
 	import Setting from "./setting/Timer.setting.svelte";
 	import { IPSCBluetooth } from "./StopPlateBluethoothClass";
-	import { showModal } from "svelte-native";
+	import { navigate } from "svelte-native";
 	import { TimerSetting } from "./setting/TimerSettingClass";
 
 	import * as fs from "@nativescript/core/file-system";
+	import { CubicBezierAnimationCurve } from "@nativescript/core/ui/animation";
 
 	interface record {
 		//data for display
@@ -18,7 +19,7 @@
 		splitTime: number;
 	}
 
-	export let displayTime = 0; //display time , in normally this equals to record.time , when timer start it will be count down
+	let displayTime = 0; //display time , in normally this equals to record.time , when timer start it will be count down
 	let currentShot: number = 0; //in program order
 	let totalShot: number = 0; //in program order
 	let records: record[] = [
@@ -36,6 +37,7 @@
 	let stopButtonEnabled: boolean = false;
 	let isTimerStarted: boolean = false;
 	let countDownInterval: NodeJS.Timer;
+	let rerenderValue = true;
 
 	//#region get buzzer ready
 	const pathToBeep = fs.path.join(
@@ -52,50 +54,56 @@
 		return Math.random() * (max - min) + min; // The maximum is exclusive and the minimum is inclusive
 	}
 
-	function beep(duration: number) {
-		mediaPlayer.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC);
-		mediaPlayer.prepare();
-		mediaPlayer.setVolume(100, 100);
-		mediaPlayer.start();
-		setTimeout(() => {
-			mediaPlayer.stop();
-		}, duration);
+	async function beep(duration: number) {
+		return new Promise((resolve) => {
+			mediaPlayer.setAudioStreamType(
+				android.media.AudioManager.STREAM_MUSIC
+			);
+			mediaPlayer.prepare();
+			mediaPlayer.start();
+			setTimeout(() => {
+				mediaPlayer.stop();
+				resolve(null);
+			}, duration);
+		});
 	}
 
 	async function onTimerStart() {
-		stopButtonEnabled = true;
-		reviewButtonEnabled = true;
-		menuButtonEnabled = false;
-		startButtonEnabled = false;
-		clearButtonEnabled = false;
-		isTimerStarted = true;
-		//#region count down
-		let startCountDownTime = new Date().getTime();
-		let countDownDelay = getRandomNumberInRange(
-			TimerSetting.DelayMin,
-			TimerSetting.DelayMax
-		);
-		IPSCBluetooth.registerHitEvent(() => {
-			onTimerStop();
+		new Promise(async (resolve) => {
+			stopButtonEnabled = true;
+			reviewButtonEnabled = true;
+			menuButtonEnabled = false;
+			startButtonEnabled = false;
+			clearButtonEnabled = false;
+			isTimerStarted = true;
+			//#region count down
+			const startCountDownTime = new Date().getTime();
+			const countDownDelay = getRandomNumberInRange(
+				TimerSetting.DelayMin,
+				TimerSetting.DelayMax
+			);
+			IPSCBluetooth.registerHitEvent(() => {
+				onTimerStop();
+			});
+			await new Promise((resolve, reject) => {
+				countDownInterval = setInterval(() => {
+					displayTime =
+						countDownDelay -
+						(new Date().getTime() - startCountDownTime) / 1000;
+					if (
+						(new Date().getTime() - startCountDownTime) / 1000 >
+						countDownDelay
+					) {
+						resolve(null);
+					}
+				}, 1);
+			});
+			//#endregion
+			clearInterval(countDownInterval);
+			onTimerClear();
+			beep(TimerSetting.BeepDuration * 1000);
+			resolve(null);
 		});
-
-		await new Promise((resolve, reject) => {
-			countDownInterval = setInterval(() => {
-				displayTime =
-					countDownDelay -
-					(new Date().getTime() - startCountDownTime) / 1000;
-				if (
-					(new Date().getTime() - startCountDownTime) / 1000 >
-					countDownDelay
-				) {
-					resolve(null);
-				}
-			}, 1);
-		});
-		//#endregion
-		onTimerClear();
-		clearInterval(countDownInterval);
-		beep(TimerSetting.BeepDuration * 1000);
 	}
 
 	function onTimerClear() {
@@ -138,7 +146,16 @@
 	}
 
 	function onMenu() {
-		showModal({ page: Setting, fullscreen: true, animated: true });
+		navigate({
+			page: Setting,
+			animated: true,
+			transition: {
+				name: "slideRight",
+				curve: new CubicBezierAnimationCurve(0.85, -0.01, 0.1, 1.02),
+				duration: 300,
+			},
+			backstackVisible: true,
+		});
 	}
 
 	function onSelectHistory(e: CustomEvent<{ item: record }>) {
@@ -149,29 +166,32 @@
 </script>
 
 <dockLayout stretchLastChild="false">
-	<flexboxLayout dock="top">
-		<TimerTime bind:time={displayTime} />
-		<TimerDetails
-			bind:currentShot={records[currentShot].shot}
-			bind:totalShot
-			bind:splitTime={records[currentShot].splitTime}
-		/>
-		<TimerButtonGroup
-			on:start={onTimerStart}
-			on:clear={onTimerClear}
-			on:review={onTimerReview}
-			on:stop={onTimerStop}
-			on:menu={onMenu}
-			{menuButtonEnabled}
-			{startButtonEnabled}
-			{clearButtonEnabled}
-			{reviewButtonEnabled}
-			{stopButtonEnabled}
-		/>
-	</flexboxLayout>
-	<flexboxLayout dock="top" style="height: 100%;">
-		<TimerHistory on:selectHistory={onSelectHistory} {records} />
-	</flexboxLayout>
+	{#if rerenderValue}
+		<flexboxLayout dock="top">
+			<TimerTime time={displayTime} />
+			<TimerDetails
+				currentShot={records[currentShot].shot}
+				totalShot={records.length - 1}
+				splitTime={records[currentShot].splitTime}
+			/>
+			<TimerButtonGroup
+				on:start={onTimerStart}
+				on:clear={onTimerClear}
+				on:review={onTimerReview}
+				on:stop={onTimerStop}
+				on:menu={onMenu}
+				{menuButtonEnabled}
+				{startButtonEnabled}
+				{clearButtonEnabled}
+				{reviewButtonEnabled}
+				{stopButtonEnabled}
+			/>
+		</flexboxLayout>
+		<flexboxLayout dock="top" style="height: 100%;">
+			<TimerHistory on:selectHistory={onSelectHistory} {records} />
+		</flexboxLayout>
+		<label>{rerenderValue}</label>
+	{/if}
 </dockLayout>
 
 <style scoped lang="scss">
