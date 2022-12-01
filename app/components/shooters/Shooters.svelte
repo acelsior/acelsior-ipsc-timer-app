@@ -1,10 +1,13 @@
 <script lang="ts">
+	import ShootersList from "./Shooters.list.svelte"
 </script>
 
 <frame>
 	<page>
 		<actionBar title="Shooters" />
-		<label>dw</label>
+		<stackLayout>
+			<ShootersList />
+		</stackLayout>
 	</page>
 </frame>
 
@@ -16,7 +19,6 @@
 		color: $majorColor;
 	}
 
-	frame,
 	page {
 		background-color: $majorBackgroundColor;
 	}

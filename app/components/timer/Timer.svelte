@@ -1,5 +1,5 @@
 <script lang="ts">
-	import TimerTime from "./Timer.Time.svelte";
+	import TimerTime from "./Timer.time.svelte";
 	import TimerDetails from "./Timer.Details.svelte";
 	import TimerButtonGroup from "./Timer.buttonGroup.svelte";
 	import TimerHistory from "./Timer.history.svelte";

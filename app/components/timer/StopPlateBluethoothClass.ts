@@ -1,8 +1,4 @@
-import { Bluetooth, ReadResult, Peripheral, getBluetoothInstance, } from "@nativescript-community/ble";
-
-// import { android } from "@nativescript/core/application"
-
-android.bluetooth.BluetoothAdapter.class
+import { ReadResult, Peripheral, getBluetoothInstance, } from "@nativescript-community/ble";
 
 export class IPSCBluetooth {
 	private static hit_event: ((hit_data: ReadResult) => void)[]
