@@ -165,37 +165,50 @@
 	}
 </script>
 
-<dockLayout stretchLastChild="false">
-	{#if rerenderValue}
-		<flexboxLayout dock="top">
-			<TimerTime time={displayTime} />
-			<TimerDetails
-				currentShot={records[currentShot].shot}
-				totalShot={records.length - 1}
-				splitTime={records[currentShot].splitTime}
-			/>
-			<TimerButtonGroup
-				on:start={onTimerStart}
-				on:clear={onTimerClear}
-				on:review={onTimerReview}
-				on:stop={onTimerStop}
-				on:menu={onMenu}
-				{menuButtonEnabled}
-				{startButtonEnabled}
-				{clearButtonEnabled}
-				{reviewButtonEnabled}
-				{stopButtonEnabled}
-			/>
-		</flexboxLayout>
-		<flexboxLayout dock="top" style="height: 100%;">
-			<TimerHistory on:selectHistory={onSelectHistory} {records} />
-		</flexboxLayout>
-		<label>{rerenderValue}</label>
-	{/if}
-</dockLayout>
+<frame>
+	<page>
+		<actionBar title="IPSC Timer" />
+		<dockLayout stretchLastChild="false">
+			{#if rerenderValue}
+				<flexboxLayout dock="top">
+					<TimerTime time={displayTime} />
+					<TimerDetails
+						currentShot={records[currentShot].shot}
+						totalShot={records.length - 1}
+						splitTime={records[currentShot].splitTime}
+					/>
+					<TimerButtonGroup
+						on:start={onTimerStart}
+						on:clear={onTimerClear}
+						on:review={onTimerReview}
+						on:stop={onTimerStop}
+						on:menu={onMenu}
+						{menuButtonEnabled}
+						{startButtonEnabled}
+						{clearButtonEnabled}
+						{reviewButtonEnabled}
+						{stopButtonEnabled}
+					/>
+				</flexboxLayout>
+				<flexboxLayout dock="top" style="height: 100%;">
+					<TimerHistory
+						on:selectHistory={onSelectHistory}
+						{records}
+					/>
+				</flexboxLayout>
+				<label>{rerenderValue}</label>
+			{/if}
+		</dockLayout>
+	</page>
+</frame>
 
 <style scoped lang="scss">
 	@import "../../color.scss";
+
+	actionBar {
+		background-color: $majorBackgroundColor;
+		color: $majorColor
+	}
 
 	flexboxLayout {
 		flex-direction: column;
