@@ -1,7 +1,9 @@
 <script lang="ts">
 </script>
 
-<label>awd</label>
+<label>
+
+</label>
 
 <style lang="scss">
 

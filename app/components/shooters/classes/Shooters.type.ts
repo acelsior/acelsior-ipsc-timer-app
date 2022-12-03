@@ -4,8 +4,8 @@
 type ShooterID_Backstring = string;
 export type ShooterID = `shooter:${ShooterID_Backstring}`;
 
-const SnowflakeId = require('snowflake-id');
-var snowflake = new SnowflakeId({
+const Snowflake = require('snowflake-id/dist/snowflake-id.min.js');
+const snowflake = new Snowflake({
     mid : 42,
     offset : (new Date().getFullYear()-1970)*31536000*1000 //generate offset
 });
@@ -29,8 +29,12 @@ export class Shooter {
 
 	}
 
-	static CreateShooter() {
+	static CreateShooter(option: ICreateShooter) {
 
 	}
 	//#endregion
+}
+
+export interface ICreateShooter {
+
 }

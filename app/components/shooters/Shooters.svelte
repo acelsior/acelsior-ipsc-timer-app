@@ -1,5 +1,7 @@
 <script lang="ts">
-	import ShootersList from "./Shooters.list.svelte"
+	import ShootersList from "./Shooters.list.svelte";
+	import { Shooter } from "./classes/Shooters.type";
+
 </script>
 
 <frame>
