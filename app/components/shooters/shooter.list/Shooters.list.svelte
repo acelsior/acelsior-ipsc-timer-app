@@ -6,6 +6,9 @@
 	let shooters: Shooter[];
 
 	shooters = ShooterStore.GetAllShooter()
+	ShooterStore.onSettingsChanged(() => {
+		shooters = ShooterStore.GetAllShooter()
+	})
 </script>
 
 <scrollView height="90%">

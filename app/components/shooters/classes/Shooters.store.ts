@@ -7,12 +7,25 @@ import { IShooter, Shooter, ShooterID } from "./Shooters.type";
 
 
 export class ShooterStore {
+	static event_list: Function[] = []
+
+	static onSettingsChanged(func: Function) {
+		this.event_list.push(func);
+	}
+
+	private static TriggerSettingsChange() {
+		this.event_list.forEach((fn) => {
+			fn()
+		})
+	}
+
 	static StoreShooter(shooter: Shooter) {
 		ApplicationSettings.setString(`shooterStore:${shooter.shooter_id}`, encodeObject(shooter))
 		const str_shooter_list = ApplicationSettings.getString(`shooterStore:shooterList`, "[]")
 		const shooterList = JSON.parse(str_shooter_list)
 		shooterList.push(shooter.shooter_id)
 		ApplicationSettings.setString(`shooterStore:shooterList`, JSON.stringify(shooterList))
+		this.TriggerSettingsChange()
 	}
 
 	static GetAllShooter(): Shooter[] {
