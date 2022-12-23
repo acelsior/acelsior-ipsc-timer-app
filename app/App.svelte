@@ -1,7 +1,9 @@
 <page>
-	<Home />
+	<!-- <Timer /> -->
+	<Shooters />
 </page>
 
 <script lang="ts">
-    import Home from './components/Home.svelte'
+    import Timer from './components/timer/Timer.svelte'
+    import Shooters from './components/shooters/Shooters.svelte'
 </script>
