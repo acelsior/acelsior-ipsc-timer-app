@@ -23,7 +23,7 @@ export const Division = {
 export interface IShooter {
 	shooter_id: ShooterID;
 	name: string;
-	division: string;
+	division: Division;
 }
 
 /**
@@ -34,12 +34,21 @@ export interface IShooter {
 export class Shooter implements IShooter {
 	shooter_id: ShooterID;
 	name: string;
-	division: string;
+	division: Division;
 
-	private constructor(shooter_id: ShooterID, name: string, division: string) {
+	private constructor(shooter_id: ShooterID, name: string, division: Division) {
 		this.shooter_id = shooter_id
 		this.name = name;
 		this.division = division
+	}
+
+	setName(newName: string) {
+		this.name = newName
+		ShooterStore.ChangeShooter(this)
+	}
+	setDivision(newDivision: Division) {
+		this.division = newDivision
+		ShooterStore.ChangeShooter(this)
 	}
 
 	//#region static methods and properties
@@ -54,6 +63,10 @@ export class Shooter implements IShooter {
 
 	static CreateShooter(option: ICreateShooter) {
 		ShooterStore.StoreShooter(new Shooter(this.GenerateUniqueID(), option.name, option.division))
+	}
+
+	static DeleteShooter(shooter_id: ShooterID) {
+		ShooterStore.DeleteShooter(shooter_id)
 	}
 	//#endregion
 }

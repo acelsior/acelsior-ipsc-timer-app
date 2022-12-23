@@ -28,6 +28,23 @@ export class ShooterStore {
 		this.TriggerSettingsChange()
 	}
 
+	static DeleteShooter(shooterId: ShooterID) {
+		ApplicationSettings.remove(`shooterStore:${shooterId}`)
+		const str_shooter_list = ApplicationSettings.getString(`shooterStore:shooterList`, "[]")
+		const shooterList = JSON.parse(str_shooter_list) as ShooterID[]
+		shooterList.splice(shooterList.indexOf(shooterId),shooterList.indexOf(shooterId))
+		ApplicationSettings.setString(`shooterStore:shooterList`, JSON.stringify(shooterList))
+		console.log(shooterList)
+		this.TriggerSettingsChange()
+
+	}
+
+	static ChangeShooter(shooter: Shooter) {
+		console.log(encodeObject(shooter), shooter.name)
+		ApplicationSettings.setString(`shooterStore:${shooter.shooter_id}`, encodeObject(shooter))
+		this.TriggerSettingsChange()
+	}
+
 	static GetAllShooter(): Shooter[] {
 		var shooterList: Shooter[] = []
 		const shootersId: ShooterID[] = JSON.parse(ApplicationSettings.getString(`shooterStore:shooterList`, "[]"))

@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { PropertyChangeData } from "@nativescript/core";
-	import { Division, Shooter } from "./classes/Shooters.type";
+	import { Dialogs, PropertyChangeData } from "@nativescript/core";
+	import { goBack } from "svelte-native";
+	import { Division, Shooter, ShooterID } from "./classes/Shooters.type";
 	export let isNewShooter = false; //if false it will change the shooter profile, if true it will create a new shooter
 
 	const divisions = Object.values(Division);
 
+	export let shooterId: ShooterID; //when edit mode is enabled
 	export let shooterName = "";
 	export let shooterDivision: Division = "Open";
 
@@ -13,11 +15,26 @@
 	}
 
 	function createShooter() {
-		console.log("createShooter", shooterName, shooterDivision);
 		Shooter.CreateShooter({
 			division: shooterDivision,
 			name: shooterName,
 		})
+	}
+
+	function removeShooter() {
+		Dialogs.confirm("Confirm delete?").then(resualt => {
+			if (resualt) {
+				Shooter.DeleteShooter(shooterId);
+				goBack()
+			}
+		})
+	}
+
+	function applyShooter() {
+		const shooter = Shooter.GetShooter(shooterId);
+		shooter.setName(shooterName)
+		shooter.setDivision(shooterDivision);
+		goBack()
 	}
 </script>
 
@@ -37,7 +54,10 @@
 			{#if isNewShooter}
 				<button on:tap={createShooter}> {"<<"} Add shooter</button>
 			{:else}
-				<button>Apply</button>
+				<gridLayout columns="*, *">
+					<button column="0" on:tap={applyShooter}>Apply</button>
+					<button column="1" on:tap={removeShooter}>Remove shooter</button>
+				</gridLayout>
 			{/if}
 		</gridLayout>
 	</dockLayout>
