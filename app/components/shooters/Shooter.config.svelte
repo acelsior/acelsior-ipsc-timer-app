@@ -19,6 +19,7 @@
 			division: shooterDivision,
 			name: shooterName,
 		})
+		goBack();
 	}
 
 	function removeShooter() {
